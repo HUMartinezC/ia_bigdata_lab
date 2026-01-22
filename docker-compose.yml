@@ -14,6 +14,7 @@ services:
       - ./notebooks:/home/jovyan/work/notebooks:rw
       - ./models:/home/jovyan/work/models:rw
       - ./data:/home/jovyan/work/data:ro
+      - ./utils:/home/jovyan/work/utils:ro
     environment:
       - JUPYTER_ENABLE_LAB=${JUPYTER_ENABLE_LAB}
       - JUPYTER_PASSWORD=${JUPYTER_PASSWORD}
