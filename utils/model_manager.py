@@ -1,137 +1,88 @@
+from pathlib import Path
 import joblib
-import os
-import inspect
 
 
 class ModelManager:
     """
-    Clase para gestionar el guardado y carga de modelos de machine learning.
-    Estructura de directorios:
-    models/
-        ├── <carpeta_padre_notebook>/
-            ├── <carpeta_nombre_notebook>/
-                ├── <nombre_modelo>.joblib
+    Clase para gestionar modelos ML.
+
+    Estructura de guardado:
+    /home/jovyan/work/models/<notebook_subpath>/<model_name>.joblib
+
+    - notebook_subpath: subcarpeta relativa desde notebooks/ (obligatorio)
+      Ejemplo: '5_problemas_clasificacion/3_clasificacion_cifar10'
+    - overwrite: obligatorio al guardar, evita sobrescribir sin querer.
     """
 
-    def __init__(self, base_dir=None):
-        try:
-            # Obtener ruta raíz del proyecto
-            current_file = inspect.getfile(inspect.currentframe())
-            project_root = os.path.abspath(
-                os.path.join(os.path.dirname(current_file), "..", "..")
+    def __init__(self, notebook_subpath: str):
+        if not notebook_subpath:
+            raise ValueError(
+                "Debes especificar 'notebook_subpath', "
+                "p.ej. '5_problemas_clasificacion/3_clasificacion_cifar10'"
             )
 
-            # Definir directorio base para guardar modelos
-            if base_dir is None:
-                base_dir = os.path.join(project_root, "models")
+        self.notebook_subpath = Path(notebook_subpath)
 
-            self.base_dir = base_dir
+        # Ruta raíz del proyecto en el contenedor
+        self.project_root = Path("/home/jovyan/work").resolve()
 
-            # Crear el directorio base si no existe
-            if not os.path.exists(self.base_dir):
-                os.makedirs(self.base_dir)
-        except Exception as e:
-            raise RuntimeError("No se pudo inicializar el ModelManager.") from e
-
-    def _get_notebook_info(self):
-        """
-        Obtiene el nombre del notebook y su carpeta padre.
-        """
-        frame = inspect.currentframe()
-        try:
-            # Retroceder frames: _get_notebook_info -> _get_model_dir -> save/load_model -> usuario
-            caller_frame = (
-                frame.f_back.f_back
-                if frame.f_back and frame.f_back.f_back
-                else frame.f_back
+        # Carpeta base de modelos
+        self.base_dir = self.project_root / "models"
+        if not self.base_dir.exists():
+            raise ValueError(
+                f"La carpeta '{self.base_dir}' no existe. Debe existir en la raíz del proyecto."
             )
-            if not caller_frame:
-                raise RuntimeError("No se puede obtener el frame del llamador.")
 
-            file = inspect.getfile(caller_frame)
-            notebook_path = os.path.abspath(file)
-
-            parent_folder = os.path.basename(os.path.dirname(notebook_path))
-            notebook_name = os.path.splitext(os.path.basename(notebook_path))[0]
-
-            return parent_folder, notebook_name
-
-        except Exception as e:
-            raise RuntimeError(
-                "No se pudo obtener la información del notebook. "
-                "Asegúrate de ejecutar esto dentro de un Jupyter Notebook."
-            ) from e
-        finally:
-            del frame
-
-    def _get_model_dir(self):
+    def _get_model_dir(self) -> Path:
         """
-        Obtiene el directorio donde se guardarán los modelos para el notebook actual.
+        Obtiene el directorio donde se guardarán los modelos de este notebook.
         """
-        try:
-            parent_folder, notebook_name = self._get_notebook_info()
-            model_dir = os.path.join(self.base_dir, parent_folder, notebook_name)
-            os.makedirs(model_dir, exist_ok=True)
-            return model_dir
-        except Exception as e:
-            raise RuntimeError(
-                "No se pudo obtener o crear el directorio del modelo."
-            ) from e
+        model_dir = self.base_dir / self.notebook_subpath
+        model_dir.mkdir(parents=True, exist_ok=True)
+        return model_dir
 
-    def save_model(self, model, model_name, overwrite=False):
+    def save_model(self, model, model_name: str, overwrite: bool):
         """
-        Guarda el modelo en el directorio correspondiente utilizando joblib.
+        Guarda un modelo en el directorio correspondiente usando joblib.
+
         :param model: Modelo a guardar.
         :param model_name: Nombre del modelo (sin extensión).
-        :param overwrite (bool): Indica si se debe sobrescribir un modelo existente (default: False).
+        :param overwrite: Debe ser True para sobrescribir un modelo existente.
         """
+        if not model_name or model is None:
+            raise ValueError("Debe especificar 'model_name' y 'model'.")
 
-        try:
-            if not model_name:
-                raise ValueError("El parámetro 'model_name' es obligatorio.")
+        if overwrite not in [True, False]:
+            raise ValueError(
+                "Debes especificar explícitamente overwrite=True o overwrite=False"
+            )
 
-            if model is None:
-                raise ValueError("El parámetro 'model' es obligatorio.")
+        model_dir = self._get_model_dir()
+        model_path = model_dir / f"{model_name}.joblib"
 
-            if overwrite not in [True, False]:
-                raise ValueError(
-                    "Debes especificar explícitamente overwrite=True o overwrite=False"
-                )
+        if model_path.exists() and not overwrite:
+            raise FileExistsError(
+                f"El modelo '{model_name}' ya existe en {model_dir}. "
+                "Usa overwrite=True para sobrescribirlo."
+            )
 
-            model_dir = self._get_model_dir()
-            model_path = os.path.join(model_dir, f"{model_name}.joblib")
+        joblib.dump(model, model_path)
+        print(f"Modelo guardado en: {model_path}")
 
-            if not overwrite and os.path.exists(model_path):
-                raise FileExistsError(
-                    f"El modelo '{model_name}' ya existe en {model_dir}. "
-                    f"Usa overwrite=True para sobrescribir."
-                )
-
-            joblib.dump(model, model_path)
-            print(f"Modelo guardado en: {model_path}")
-        except (ValueError, FileExistsError):
-            raise
-        except Exception as e:
-            raise RuntimeError("Error al guardar el modelo.") from e
-
-    def load_model(self, model_name):
+    def load_model(self, model_name: str):
         """
-        Carga un modelo guardado previamente.
+        Carga un modelo previamente guardado.
         """
-        try:
-            if not model_name:
-                raise ValueError("El parámetro 'model_name' es obligatorio.")
+        if not model_name:
+            raise ValueError("Debe especificar 'model_name'")
 
-            model_dir = self._get_model_dir()
-            model_path = os.path.join(model_dir, f"{model_name}.joblib")
-            if not os.path.exists(model_path):
-                raise FileNotFoundError(
-                    f"No se encontró el modelo '{model_name}' en {model_dir}"
-                )
-            model = joblib.load(model_path)
-            print(f"Modelo cargado desde: {model_path}")
-            return model
-        except (ValueError, FileNotFoundError):
-            raise
-        except Exception as e:
-            raise RuntimeError("Error al cargar el modelo.") from e
+        model_dir = self._get_model_dir()
+        model_path = model_dir / f"{model_name}.joblib"
+
+        if not model_path.exists():
+            raise FileNotFoundError(
+                f"No se encontró el modelo '{model_name}' en {model_dir}"
+            )
+
+        print(f"Modelo cargado desde: {model_path}")
+        return joblib.load(model_path)
