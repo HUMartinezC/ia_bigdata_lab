@@ -1,0 +1,20 @@
+services:
+  jupyter:
+    # Utilizar la imagen oficial de Jupyter con TensorFlow preinstalado
+    # Sino, utilizar Dockerfile para agregar más librerías según necesidad
+    image: jupyter/tensorflow-notebook:latest
+    # Para utilizar GPU, descomenta la siguiente línea y asegúrate de tener Docker con soporte para GPU
+    # image: jupyter/tensorflow-notebook:latest-gpu
+    # runtime: nvidia
+    # environment:
+    #   - NVIDIA_VISIBLE_DEVICES=all
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./notebooks:/home/jovyan/work/notebooks:rw
+      - ./models:/home/jovyan/work/models:rw
+      - ./data:/home/jovyan/work/data:ro
+    environment:
+      - JUPYTER_ENABLE_LAB=${JUPYTER_ENABLE_LAB}
+      - JUPYTER_PASSWORD=${JUPYTER_PASSWORD}
+      - JUPYTER_TOKEN=${JUPYTER_TOKEN}

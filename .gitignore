@@ -1,0 +1,47 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments and tooling
+.env
+.venv/
+venv/
+env/
+pip-wheel-metadata/
+.python-version
+
+# Jupyter
+.ipynb_checkpoints/
+*.nbconvert.ipynb
+
+# Logs and temp files
+*.log
+logs/
+tmp/
+
+# Data and artifacts
+data/raw/
+data/processed/
+data/interim/
+data/external/
+data/tmp/
+models/
+checkpoints/
+outputs/
+*.ckpt
+*.pth
+*.pt
+*.h5
+
+# Editors and OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Docker extras
+docker-data/
+.docker/
