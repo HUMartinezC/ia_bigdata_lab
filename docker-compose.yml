@@ -15,6 +15,7 @@ services:
       - ./models:/home/jovyan/work/models:rw
       - ./data:/home/jovyan/work/data:ro
       - ./utils:/home/jovyan/work/utils:ro
+    restart: unless-stopped
     environment:
       - JUPYTER_ENABLE_LAB=${JUPYTER_ENABLE_LAB}
       - JUPYTER_PASSWORD=${JUPYTER_PASSWORD}
