@@ -171,7 +171,7 @@ cp .env.example .env
 
 ## 🎯 Objetivos de Aprendizaje
 
-E*Notas de implementación:**
+**Notas de implementación:**
 - Crear carpeta `models/` si no existe para almacenar modelos entrenados
 - Instalar `requirements.txt` si se usa entorno local
 - Consultar logs del contenedor con `docker-compose logs jupyter` para debugging
