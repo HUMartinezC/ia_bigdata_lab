@@ -184,16 +184,4 @@ Proyecto de aprendizaje - IA + Big Data
 
 ---
 
-**Última actualización:** Febrente y puede ejecutarse por separado
-
-*Crear `models/` de ser necesario.
-
-## ✍️ Autor
-
-HMartinez
-
-Proyecto de aprendizaje - IA + Big Data
-
----
-
 **Última actualización:** Febrero 2026
