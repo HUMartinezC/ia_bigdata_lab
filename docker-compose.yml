@@ -37,3 +37,6 @@ services:
       - JUPYTER_PASSWORD=${JUPYTER_PASSWORD}
       - JUPYTER_TOKEN=${JUPYTER_TOKEN}
       - PYTHONPATH=${PYTHONPATH}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    gpus: all

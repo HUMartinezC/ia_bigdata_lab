@@ -1,30 +1,23 @@
-# Base CPU con TensorFlow y JupyterLab
-FROM jupyter/tensorflow-notebook:latest
+# Base con CUDA + TensorFlow + Jupyter
+FROM tensorflow/tensorflow:2.16.1-gpu-jupyter
 
 # Directorio de trabajo
 WORKDIR /home/jovyan/work
 
-# Variables de entorno
-ENV CONDA_ENV_NAME=ia_bigdata
-ENV KERNEL_DISPLAY_NAME="IA & BigData"
+# Crear directorios esperados por los volúmenes
+RUN mkdir -p /home/jovyan/work
 
-# Crear entorno Conda con librerías básicas + kernel
-RUN conda create -y -n $CONDA_ENV_NAME python=3.11 \
+# Dependencias necesarias para los notebooks
+RUN pip install --no-cache-dir \
     numpy \
     pandas \
     scikit-learn \
     matplotlib \
     seaborn \
-    ipykernel \
-    jupyterlab \
- && conda clean --all -y \
- # Instalar TensorFlow y keras-tuner vía pip (rápido)
- && /opt/conda/bin/conda run -n $CONDA_ENV_NAME pip install tensorflow==2.20 keras-tuner \
- # Registrar kernel en JupyterLab
- && /opt/conda/bin/conda run -n $CONDA_ENV_NAME python -m ipykernel install --user --name $CONDA_ENV_NAME --display-name "$KERNEL_DISPLAY_NAME"
- 
+    keras-tuner
+
 # Exponer puerto de Jupyter
 EXPOSE 8888
 
 # Arrancar JupyterLab
-CMD ["start-notebook.sh", "--LabApp.token=''"]
+CMD ["jupyter", "lab", "--ip=0.0.0.0", "--no-browser", "--allow-root", "--ServerApp.token=", "--ServerApp.password="]
