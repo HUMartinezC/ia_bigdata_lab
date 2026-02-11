@@ -1,13 +1,29 @@
+# services:
+#   jupyter:
+#     image: jupyter/tensorflow-notebook:latest
+
+#     ports:
+#       - "8888:8888"
+#     volumes:
+#       - ./notebooks:/home/jovyan/work/notebooks:rw
+#       - ./models:/home/jovyan/work/models:rw
+#       - ./data:/home/jovyan/work/data:ro
+#       - ./utils:/home/jovyan/work/utils:ro
+#     restart: unless-stopped
+#     environment:
+#       - JUPYTER_ENABLE_LAB=${JUPYTER_ENABLE_LAB}
+#       - JUPYTER_PASSWORD=${JUPYTER_PASSWORD}
+#       - JUPYTER_TOKEN=${JUPYTER_TOKEN}
+#       - PYTHONPATH=${PYTHONPATH}
+
+
 services:
   jupyter:
-    # Utilizar la imagen oficial de Jupyter con TensorFlow preinstalado
-    # Sino, utilizar Dockerfile para agregar más librerías según necesidad
-    image: jupyter/tensorflow-notebook:latest
-    # Para utilizar GPU, descomenta la siguiente línea y asegúrate de tener Docker con soporte para GPU
-    # image: jupyter/tensorflow-notebook:latest-gpu
-    # runtime: nvidia
-    # environment:
-    #   - NVIDIA_VISIBLE_DEVICES=all
+    # Usamos el Dockerfile personalizado para incluir Conda y otras dependencias
+    build:
+      context: ./docker/
+      dockerfile: Dockerfile
+    container_name: jupyter_lab
     ports:
       - "8888:8888"
     volumes:
@@ -17,7 +33,7 @@ services:
       - ./utils:/home/jovyan/work/utils:ro
     restart: unless-stopped
     environment:
-      - JUPYTER_ENABLE_LAB=${JUPYTER_ENABLE_LAB}
+      - JUPYTER_ENABLE_LAB=yes
       - JUPYTER_PASSWORD=${JUPYTER_PASSWORD}
       - JUPYTER_TOKEN=${JUPYTER_TOKEN}
       - PYTHONPATH=${PYTHONPATH}
