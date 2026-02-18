@@ -14,7 +14,9 @@ RUN pip install --no-cache-dir \
     scikit-learn \
     matplotlib \
     seaborn \
-    keras-tuner
+    keras-tuner \
+    kagglehub \
+    imbalanced-learn
 
 # Exponer puerto de Jupyter
 EXPOSE 8888
