@@ -10,8 +10,8 @@ services:
     volumes:
       - ./notebooks:/home/jovyan/work/notebooks:rw
       - ./models:/home/jovyan/work/models:rw
-      - ./data:/home/jovyan/work/data:ro
-      - ./utils:/home/jovyan/work/utils:ro
+      - ./data:/home/jovyan/work/data:rw
+      - ./utils:/home/jovyan/work/utils:rw
     restart: unless-stopped
     environment:
       - JUPYTER_ENABLE_LAB=yes
