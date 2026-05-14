@@ -16,7 +16,9 @@ RUN pip install --no-cache-dir \
     seaborn \
     keras-tuner \
     kagglehub \
-    imbalanced-learn
+    imbalanced-learn \
+    xgboost \
+    statsmodels
 
 # Exponer puerto de Jupyter
 EXPOSE 8888
